@@ -71,7 +71,11 @@ function rg(){var hd=document.getElementById('hud'),old=hd.querySelector('.cards
   if(G.on&&G.m!==TO.m){TO.m=G.m;toast(G.m,G.kd);var key=G.rd+'.'+G.c+(G.kd||'');if(TO.k!==key){TO.k=key;cue(G.kd,G.m)}}}
  else hd.innerHTML='';
  if(!G.on){toast('');TO.m=''}
- document.getElementById('ax').innerHTML=G.a;if(sheet=='jr')sjr()}
+ document.getElementById('ax').innerHTML=G.on?G.a:stc();if(sheet=='jr')sjr()}
+// Hors partie, la carte de départ s'affiche sur la table : « Commencer » dès qu'il y a 2 joueurs, sinon un raccourci vers les joueurs
+function stc(){if(S.mode=='b')return'';var n=G.P.length,tg=document.getElementById('tg');
+ if(n<2)return'<div class="ax-card ax-row"><div><div class="ax-k">Nouvelle partie</div><div class="ax-t">'+(n?'Ajoutez au moins un autre joueur':'Ajoutez des joueurs')+'</div></div><button class="ax-ok" onclick="openSh(\'jr\')">Joueurs</button></div>';
+ return'<div class="ax-card ax-row"><div><div class="ax-k">'+n+' joueurs · objectif '+(+tg.value||343)+'</div><div class="ax-t">Prêts à jouer ?</div></div><button class="ax-ok" onclick="startG()">Commencer</button></div>'}
 var PS={};
 function hudTick(){[].forEach.call(document.querySelectorAll('#hud .ps'),function(e){var o=PS[e.dataset.k];if(!o)return;o.to=+e.dataset.v;var d=o.to-o.v;if(Math.abs(d)<.5)o.v=o.to;else o.v+=d*.1;e.textContent=Math.round(o.v);var b=e.parentNode.querySelector('.pb s');if(b)b.style.width=Math.max(0,Math.min(100,o.v/G.t*100))+'%'});requestAnimationFrame(hudTick)}
 function setMode(m){S.mode=m;res('');document.getElementById('bk').style.display=m=='b'?'block':'none';document.getElementById('hn').textContent=m=='b'?'Glissez pour tourner · touchez une face pour la choisir':m=='t'?'Touchez la table pour lancer les dés':'';rg()}
