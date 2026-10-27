@@ -129,10 +129,9 @@
 <p class="nt" id="cseatn"></p>
 <h3 class="pn-h">Partie</h3>
 <div class="pn-card">
-<div class="pn-field"><span>Objectif</span><div class="st"><button class="b" onclick="var e=document.getElementById('tg');e.value=Math.max(50,(+e.value||343)-10)" aria-label="Diminuer l’objectif">−</button><input id="tg" type="number" inputmode="numeric" min="50" max="999" value="343" aria-label="Score à atteindre"><button class="b" onclick="var e=document.getElementById('tg');e.value=Math.min(999,(+e.value||343)+10)" aria-label="Augmenter l’objectif">+</button></div></div>
-<p class="nt" id="sm">De 2 à 6 joueurs, robots compris. Choisissez votre place : les robots prennent les places libres.</p>
+<div class="pn-field"><span>Objectif</span><div class="st"><button class="b" onclick="var e=document.getElementById('tg');e.value=Math.max(50,(+e.value||343)-10);rg()" aria-label="Diminuer l’objectif">−</button><input id="tg" type="number" inputmode="numeric" min="50" max="999" value="343" oninput="rg()" aria-label="Score à atteindre"><button class="b" onclick="var e=document.getElementById('tg');e.value=Math.min(999,(+e.value||343)+10);rg()" aria-label="Augmenter l’objectif">+</button></div></div>
+<p class="nt" id="sm">De 2 à 6 joueurs, robots compris. Choisissez votre place : les robots prennent les places libres. Fermez ce panneau et touchez « Commencer » sur la table pour lancer la partie.</p>
 </div>
-<button class="go" onclick="startG()">Commencer la partie</button>
 <button class="b pn-wide" id="qt" onclick="endG()" style="display:none">Quitter la partie</button>
 </section>
 
