@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forge à dés</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="forge.css">
+</head><body>
+<div class="app">
+<div class="stg"><canvas id="cv" role="img" aria-label="Table de jeu en 3D, faites glisser pour tourner le dé en vue 3D"></canvas><div id="hud"></div><div class="toast" id="toast" role="status"></div><button class="snd" id="sn" onclick="togA()" aria-label="Son" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11"/></svg></button><div class="res" id="res" aria-live="polite"></div><div class="hint" id="hn"></div><button class="b bk" id="bk" onclick="setMode('t')" style="display:none">Retour à la table</button></div>
+<div id="ax" aria-live="polite"></div>
+<nav class="bar" aria-label="Outils">
+<button class="tb" onclick="openSh('des')"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12L4 7.5M12 12v9"/></svg>Dés</button>
+<button class="tb" onclick="openSh('jr')"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c3 0 5 2 5 5"/></svg>Joueurs</button>
+<button class="fab" onclick="btn()" aria-label="Lancer les dés"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.3" fill="currentColor"/><circle cx="15" cy="9" r="1.3" fill="currentColor"/><circle cx="9" cy="15" r="1.3" fill="currentColor"/><circle cx="15" cy="15" r="1.3" fill="currentColor"/></svg><span>Lancer</span></button>
+<button class="tb" onclick="openSh('rg')"><svg viewBox="0 0 24 24"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h6M8 13h6"/></svg>Règles</button>
+<button class="tb" onclick="openSh('hs')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Historique</button>
+</nav></div>
+<div id="sh" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="bd2" onclick="closeSh()"></div><div class="pp">
+<header class="pn-head"><span class="pn-grip"></span><h2 id="shT"></h2><button class="x" onclick="closeSh()" aria-label="Fermer">✕</button></header>
+<div class="pn-body">
+
+<section class="sc" id="s-des">
+<nav class="pn-seg" role="tablist"><button class="tab on" data-t="f" onclick="tab('f')">Forme</button><button class="tab" data-t="n" onclick="tab('n')">Faces</button><button class="tab" data-t="c" onclick="tab('c')">Couleurs</button><button class="tab" data-t="m" onclick="tab('m')">Tapis</button><button class="tab" data-t="t" onclick="tab('t')">Ambiance</button></nav>
+
+<div class="pane on" id="t-f">
+<h3 class="pn-h">Type de dé</h3>
+<div class="pn-tiles" id="tp"></div>
+<h3 class="pn-h">Forme et taille</h3>
+<div class="pn-card">
+<label class="srow"><span>Vif</span><input type="range" min="0" max="100" value="41" oninput="S.bv=.98-.32*this.value/100" aria-label="Arrondi des arêtes"><span>Rond</span></label>
+<label class="srow"><span>Petit</span><input id="dsl" type="range" min="25" max="90" value="45" onchange="setDS(this.value/100)" aria-label="Grosseur des dés"><span>Gros</span></label>
+<p class="nt" id="dsn"></p>
+</div>
+<h3 class="pn-h">Dés en lancer libre</h3>
+<div class="pn-grid4" id="cn"></div>
+<button class="b pn-wide" onclick="viewB()">Voir le dé en grand et le faire tourner</button>
+</div>
+
+<div class="pane" id="t-n">
+<h3 class="pn-h">Numéros des faces</h3>
+<p class="nt">Touchez une face, puis changez son numéro.</p>
+<div class="fgrid" id="fg"></div>
+<div class="pn-card">
+<div class="st"><button class="b" onclick="step(-1)" aria-label="Diminuer">−</button><input id="num" type="number" inputmode="numeric" min="0" max="999" aria-label="Numéro de la face" oninput="setNum(this.value)"><button class="b" onclick="step(1)" aria-label="Augmenter">+</button></div>
+<p class="nt" id="fi"></p>
+<button class="b pn-wide" onclick="auto()">Remettre les numéros standard</button>
+</div>
+<h3 class="pn-h">Faces du D6</h3>
+<div class="pn-grid2"><button class="b" id="st1" onclick="setP(1)">Points</button><button class="b" id="st0" onclick="setP(0)">Chiffres</button></div>
+<h3 class="pn-h">Réglage des chiffres</h3>
+<div class="pn-card">
+<label class="sl"><span>Taille</span><input type="range" min="50" max="160" value="100" oninput="S.ds=this.value/100"></label>
+<label class="sl"><span>Rotation</span><input type="range" min="-180" max="180" value="0" oninput="S.dr=+this.value"></label>
+<label class="sl"><span>Hauteur</span><input type="range" min="-40" max="40" value="0" oninput="S.dy=+this.value"></label>
+<button class="b pn-wide" onclick="rz()">Réinitialiser les chiffres</button>
+</div>
+</div>
+
+<div class="pane" id="t-c">
+<h3 class="pn-h">Couleur du dé</h3>
+<div class="pn-gems" id="sw"></div>
+<div class="pn-custom"><input type="color" class="pick" id="pk" value="#e4dcc8" oninput="S.col=this.value;mkSw()" aria-label="Couleur personnalisée du dé"><span>Couleur libre</span></div>
+<h3 class="pn-h">Finition</h3>
+<div class="pn-grid3" id="fn"></div>
+<h3 class="pn-h">Encre des chiffres et des points</h3>
+<div class="pn-gems" id="ik"></div>
+<div class="pn-custom"><input type="color" class="pick" id="pk2" value="#e0861f" oninput="S.ink=this.value;mkSw()" aria-label="Couleur libre de l’encre"><span>Couleur libre</span></div>
+</div>
+
+<div class="pane" id="t-m">
+<h3 class="pn-h">Matière</h3>
+<div class="pn-grid4" id="mmt"></div>
+<h3 class="pn-h">Couleur du tapis</h3>
+<div class="pn-gems" id="mcl"></div>
+<div class="pn-custom"><input type="color" class="pick" id="mpk" value="#1f4a2c" oninput="setMat('c',this.value)" aria-label="Couleur libre du tapis"><span>Couleur libre</span></div>
+<h3 class="pn-h">Bordure</h3>
+<div class="pn-grid4" id="mbd"></div>
+<p class="pn-lab">Couleur de la bordure et du motif</p><div class="pn-gems" id="mbc"></div>
+<h3 class="pn-h">Décor</h3>
+<p class="pn-lab">Motif central</p><div class="pn-grid4 pn-g5" id="mem"></div>
+<p class="pn-lab">Inscription</p><div class="pn-grid2" id="mtx"></div>
+<p class="pn-lab">Forme</p><div class="pn-grid2" id="mfm"></div>
+</div>
+
+<div class="pane" id="t-t">
+<h3 class="pn-h">Lumière</h3>
+<div class="pn-card">
+<label class="srow"><span>Douce</span><input type="range" min="50" max="160" value="100" oninput="S.li=this.value/100" aria-label="Intensité de la lumière"><span>Vive</span></label>
+</div>
+<h3 class="pn-h">Ambiance musicale</h3>
+<div class="pn-grid2"><button class="b" id="tk1" onclick="setTrk('celt')">Celtique épique</button><button class="b" id="tk0" onclick="setTrk('tav')">Taverne</button></div>
+<h3 class="pn-h">Son</h3>
+<div class="pn-grid2"><button class="b" id="bm" onclick="togM()">Musique</button><button class="b" id="bs" onclick="togS()">Bruitages</button></div>
+<div class="pn-card">
+<label class="srow"><span>Musique</span><input type="range" min="0" max="100" value="50" oninput="AU.mv=this.value/100;auVol()" aria-label="Volume de la musique"><span></span></label>
+<label class="srow"><span>Bruits</span><input type="range" min="0" max="100" value="80" oninput="AU.sv=this.value/100;auVol()" aria-label="Volume des bruitages"><span></span></label>
+<button class="b pn-wide" id="bv" onclick="togV()">Voix des robots</button>
+<button class="b pn-wide" onclick="auInit();setTimeout(function(){sfx('hit',1);sfx('good');auUi()},150)">Tester le son</button>
+<p class="nt" id="ast"></p>
+</div>
+</div>
+</section>
+
+<section class="sc" id="s-jr">
+<h3 class="pn-h">Personnage</h3>
+<div class="pn-char"><div class="pn-prev" id="cprev"></div><div class="pn-grid2 pn-pre" id="cpre"></div></div>
+<p class="nt" id="ced"></p>
+<h3 class="pn-h">Couleurs</h3>
+<div class="pn-card">
+<div class="pn-sw"><span>Tenue</span><div class="pn-gems" id="cct"></div></div>
+<div class="pn-sw"><span>Cape</span><div class="pn-gems" id="cck"></div></div>
+<div class="pn-sw"><span>Cheveux</span><div class="pn-gems" id="cch"></div></div>
+<div class="pn-sw"><span>Peau</span><div class="pn-gems" id="csk"></div></div>
+</div>
+<h3 class="pn-h">Tête</h3>
+<p class="pn-lab">Coiffe</p><div class="pn-grid4" id="chd"></div>
+<p class="pn-lab">Coupe</p><div class="pn-grid2" id="chl"></div>
+<p class="pn-lab">Pilosité</p><div class="pn-grid4" id="cbd"></div>
+<h3 class="pn-h">Silhouette</h3>
+<p class="pn-lab">Carrure</p><div class="pn-grid3 pn-g3" id="cwd"></div>
+<p class="pn-lab">Accessoire</p><div class="pn-grid4" id="cxa"></div>
+<h3 class="pn-h">À la table</h3>
+<div class="pn-list" id="pl"></div>
+<div class="pn-add"><input id="pn" type="text" maxlength="16" placeholder="Prénom" aria-label="Prénom du joueur"><button class="b tx" onclick="addH()">Ajouter</button></div>
+<button class="b pn-wide" onclick="addB()">Ajouter un robot</button>
+<h3 class="pn-h">Place à table</h3>
+<div class="pn-seats" id="cseat"></div>
+<p class="nt" id="cseatn"></p>
+<h3 class="pn-h">Partie</h3>
+<div class="pn-card">
+<div class="pn-field"><span>Objectif</span><div class="st"><button class="b" onclick="var e=document.getElementById('tg');e.value=Math.max(50,(+e.value||343)-10)" aria-label="Diminuer l’objectif">−</button><input id="tg" type="number" inputmode="numeric" min="50" max="999" value="343" aria-label="Score à atteindre"><button class="b" onclick="var e=document.getElementById('tg');e.value=Math.min(999,(+e.value||343)+10)" aria-label="Augmenter l’objectif">+</button></div></div>
+<p class="nt" id="sm">De 2 à 6 joueurs, robots compris. Choisissez votre place : les robots prennent les places libres.</p>
+</div>
+<button class="go" onclick="startG()">Commencer la partie</button>
+<button class="b pn-wide" id="qt" onclick="endG()" style="display:none">Quitter la partie</button>
+</section>
+
+<section class="sc" id="s-rg">
+<p class="pn-intro">Jeu de dés de Kaamelott, à 3 dés à 6 faces : deux « chouettes » et un « cul ». On marque des points selon la combinaison obtenue.</p>
+<h3 class="pn-h">Combinaisons</h3>
+<div class="pn-card pn-table"><table>
+<tr><th>Combinaison</th><th>Points</th></tr>
+<tr><td>Chouette : 2 dés identiques, n’importe lesquels</td><td>carré du chiffre : 1, 4, 9, 16, 25, 36 (4-4-2 = 16)</td></tr>
+<tr><td>Velute : 2 dés additionnés = le 3ᵉ</td><td>2 × carré du plus grand : 18 (1-2-3), 32 (1-3-4), 50 (1-4-5, 2-3-5), 72 (1-5-6, 2-4-6)</td></tr>
+<tr><td>Chouette velute : 1-1-2, 2-2-4, 3-3-6</td><td>8, 32, 72 pour le plus rapide à réagir</td></tr>
+<tr><td>Cul de Chouette : 3 dés identiques</td><td>50, 60, 70, 80, 90, 100 (de 1 à 6)</td></tr>
+<tr><td>Suite : 3 dés qui se suivent</td><td>le dernier à réagir perd 10</td></tr>
+<tr><td>Néant : rien de tout cela</td><td>0</td></tr>
+</table></div>
+<h3 class="pn-h">Détails</h3>
+<div class="pn-rules">
+<article><h4>Chouette velute</h4><p>Tout le monde tape sur ses genoux en criant « Pas mou, le caillou ! » : le premier à le faire gagne les points. En cas d’égalité, les joueurs concernés les perdent.</p></article>
+<article><h4>Suite</h4><p>Tout le monde tape du poing sur la table en criant « Grelotte ça picote ! ». Le dernier à le faire perd 10 points. La suite 1-2-3 est aussi une Velute de 3 (18 points pour le lanceur).</p></article>
+<article><h4>Sirotage</h4><p>Après une Chouette, on peut « siroter » : lancer le 3ᵉ dé pour tenter un Cul de Chouette. Réussite : on marque le Cul de Chouette. Échec : on perd les points de sa Chouette, mais on gagne un Civet. Les autres joueurs peuvent parier sur le chiffre du dé : 1 Linotte, 2 Alouette, 3 Fauvette, 4 Mouette, 5 Bergeronnette, 6 Chouette.</p></article>
+<article><h4>Civet</h4><p>Un seul Civet à la fois. Avant de lancer, on annonce « Civet de 50 sur une Chouette ! » : mise de 102 points maximum, sur une Chouette, un Cul de Chouette, une Velute, une Chouette velute ou une Suite. Réussite : on gagne la mise en plus des points de la combinaison. Échec : on perd la mise mais on garde les points de ce qu’on a fait. Sur un Cul de Chouette, précisez avec ou sans sirotage.</p></article>
+<article><h4>Grelottine</h4><p>Un Néant donne une Grelottine (une seule à la fois). Au début du tour d’un joueur qui a une Grelottine, un joueur qui en a une aussi peut crier « Grelottine ! » et le défier : il choisit une combinaison et une mise (30 % du plus petit des deux scores, 10 points minimum). Le défié lance : s’il réussit la combinaison, il gagne la mise ; sinon, c’est le défiant. Les deux Grelottines sont alors utilisées. Si plusieurs joueurs peuvent défier, le plus petit score passe en premier.</p></article>
+<article><h4>Bévue</h4><p>Une erreur de jeu coûte 10 points : annonce fausse, jeu hors de son tour, action interdite, dés tombés.</p></article>
+</div>
+<p class="nt">Règles courantes ; les tables de jeu varient d’un groupe à l’autre.</p>
+</section>
+
+<section class="sc" id="s-hs">
+<div class="pn-grid2"><button class="go" onclick="cph()">Copier l’historique</button><button class="b" onclick="clh()">Effacer</button></div>
+<p class="nt" id="hm">Collez-le ensuite dans l’artefact Historique, qui affiche le classement et la courbe des scores.</p>
+<a class="pn-link" href="https://claude.ai/artifact/2a2Zexu5YHJ8Y3uS5CjCME" target="_blank" rel="noopener">Ouvrir l’artefact Historique</a>
+<h3 class="pn-h">Lancers</h3>
+<div id="hl"></div>
+</section>
+
+</div>
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="forge.js"></script>
+</body></html>
