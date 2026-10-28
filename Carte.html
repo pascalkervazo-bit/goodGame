@@ -273,12 +273,12 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
           <button class="lvl" id="lEasy" data-l="easy" aria-pressed="false">
             <span class="lvl-ic">1</span>
             <span class="lvl-txt"><b>Facile</b><small>Pour apprendre tranquillement</small></span>
-            <span class="tags"><i>Indice offert</i><i>Sans chrono</i></span>
+            <span class="tags"><i>Indice offert</i><i>45 s</i></span>
           </button>
           <button class="lvl" id="lNorm" data-l="normal" aria-pressed="true">
             <span class="lvl-ic">2</span>
             <span class="lvl-txt"><b>Normal</b><small>Le jeu classique</small></span>
-            <span class="tags"><i>Indice −½ pt</i><i>4 choix</i></span>
+            <span class="tags"><i>Indice −½ pt</i><i>4 choix</i><i>30 s</i></span>
           </button>
           <button class="lvl" id="lAdv" data-l="adv" aria-pressed="false">
             <span class="lvl-ic">3</span>
@@ -1753,8 +1753,8 @@ const hard = () => level==='adv' || level==='exp';
 let qCount = 15;
 try{ const q = localStorage.getItem('tdr-q'); if(q) qCount = q==='all' ? 'all' : +q; }catch(e){}
 const LVL_DESC = {
-  easy:"L'indice s'affiche tout seul, sans chrono. Idéal pour apprendre.",
-  normal:"Indice à la demande (il coûte ½ point). Pas de chrono.",
+  easy:"L'indice s'affiche tout seul. 45 s par question, puis on passe à la suivante.",
+  normal:"Indice à la demande (il coûte ½ point). 30 s par question, puis on passe à la suivante.",
   adv:'Chrono de 15 s, réponse à écrire en mode Nomme, pas d\'indice, bonus de vitesse.',
   exp:'Chrono de 8 s, réponse à écrire, couleurs neutres, et chaque erreur coûte ½ point.'
 };
@@ -1764,15 +1764,19 @@ const TIME_FIND = 15, TIME_TYPE = 25;
 function stopTimer(){ if(timer){ clearInterval(timer); timer = null; } }
 function startTimer(){
   stopTimer();
-  if(!hard()){ $('timer').hidden = true; return; }
-  tLimit = (level==='exp' ? (mode==='name' ? 15 : 8) : (mode==='name' ? TIME_TYPE : TIME_FIND))*1000; tStart = performance.now();
+  tLimit = (level==='easy' ? 45 : level==='normal' ? 30 : level==='exp' ? (mode==='name' ? 15 : 8) : (mode==='name' ? TIME_TYPE : TIME_FIND))*1000;
+  tStart = performance.now();
   $('timer').hidden = false;
   const bar = $('tBar');
   const upd = ()=>{
     const left = Math.max(0, 1 - (performance.now()-tStart)/tLimit);
     bar.style.transform = `scaleX(${left})`; bar.classList.toggle('low', left < .3);
     $('askNum').textContent = (mixed ? MIX_LABEL[mapKey]+' · ' : '') + Math.ceil(left*tLimit/1000)+' s';
-    if(left<=0){ stopTimer(); onPick(null, {timeout:true}); }
+    if(left<=0){
+      stopTimer(); onPick(null, {timeout:true});
+      // Facile et Normal : on passe tout seul à la question suivante
+      if(!hard()){ const r = round; setTimeout(()=>{ if(answered && round===r && $('opts').hidden && $('start').hidden) $('bNext').click(); }, 3500); }
+    }
   };
   upd(); timer = setInterval(upd, 100);
 }
