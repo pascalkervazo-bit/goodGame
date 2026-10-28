@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Jeu</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: "Cinzel", serif;
+    background: #0c0806; color: #f3e3c3;
+    display: flex; align-items: center; justify-content: center;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* Braises qui montent */
+  canvas { position: fixed; inset: 0; z-index: 0; }
+
+  /* Vignette sombre sur les bords */
+  .vignette {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.85) 100%);
+  }
+
+  .ecran { position: relative; z-index: 2; text-align: center; padding: 20px; width: 100%; }
+
+  /* ===== TITRE ===== */
+  .ornement { color: #c9a24a; font-size: 22px; letter-spacing: 12px; opacity: .8; }
+  h1 {
+    font-family: "Cinzel Decorative", serif; font-weight: 900;
+    font-size: clamp(34px, 7vw, 70px);
+    margin: 6px 0;
+    background: linear-gradient(180deg, #fff6d5 0%, #e8c066 45%, #9c6b1f 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 4px 0 #3a2410) drop-shadow(0 0 25px rgba(255,160,40,.45));
+  }
+  .sous-titre {
+    font-size: 13px; letter-spacing: 6px; color: #c9a24a;
+    margin: 12px 0 40px; animation: respire 2.4s ease-in-out infinite;
+  }
+  @keyframes respire { 50% { opacity: .35; } }
+
+  /* ===== BOUTONS ===== */
+  .menu { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .btn {
+    position: relative; width: min(360px, 88vw);
+    padding: 15px 24px;
+    font-weight: 700; font-size: 18px; letter-spacing: 3px; text-transform: uppercase;
+    color: #d8c49c;
+    background: linear-gradient(180deg, rgba(60,40,22,.85), rgba(30,18,10,.9));
+    border: 2px solid #5a3e1e;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 0 rgba(255,220,150,.15), 0 4px 0 #1a0f06;
+    transition: all .18s;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  /* Coins dorés */
+  .btn::after {
+    content: ""; position: absolute; inset: 4px; border: 1px solid rgba(201,162,74,.25); border-radius: 2px; pointer-events: none;
+  }
+  /* Épée qui pointe le bouton choisi */
+  .btn::before {
+    content: "⚔"; position: absolute; left: -40px; font-size: 24px; color: #e8c066;
+    opacity: 0; transition: .18s; text-shadow: 0 0 10px rgba(255,180,60,.8);
+  }
+  .btn.actif {
+    color: #fff6d5;
+    background: linear-gradient(180deg, #8a5a22, #4a2c10);
+    border-color: #e8c066;
+    box-shadow: 0 0 22px rgba(255,170,50,.45), inset 0 0 18px rgba(255,210,120,.25), 0 4px 0 #2a1808;
+    transform: scale(1.05);
+    text-shadow: 0 0 10px rgba(255,200,100,.8);
+  }
+  .btn.actif::before { opacity: 1; left: -36px; animation: epee .6s ease-in-out infinite alternate; }
+  @keyframes epee { to { left: -28px; } }
+  .btn .ico { font-size: 20px; }
+
+  /* ===== AIDE ===== */
+  .aide {
+    position: fixed; bottom: 18px; left: 0; right: 0; z-index: 2;
+    font-size: 11px; letter-spacing: 2px; color: rgba(243,227,195,.5);
+    display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; padding: 0 10px;
+  }
+  .aide b { color: #e8c066; }
+  .son {
+    position: fixed; top: 16px; right: 16px; z-index: 3;
+    background: rgba(60,40,22,.7); border: 1px solid #5a3e1e;
+    color: #f3e3c3; font-size: 18px; padding: 8px 12px; border-radius: 6px; cursor: pointer;
+  }
+
+  /* Fondu au noir quand on valide */
+  .fondu { position: fixed; inset: 0; background: #000; z-index: 10; opacity: 0; pointer-events: none; transition: opacity .6s; }
+  .fondu.on { opacity: 1; }
+
+  @media (max-width: 480px) {
+    .btn::before { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="braises"></canvas>
+<div class="vignette"></div>
+<button class="son" id="son" title="Son">🔊</button>
+<div class="fondu" id="fondu"></div>
+
+<div class="ecran">
+  <div class="ornement">✦ ✦ ✦</div>
+  <h1>Mon Royaume</h1>
+  <p class="sous-titre">— APPUIE SUR ENTRÉE —</p>
+
+  <!-- ===================== TES BOUTONS ===================== -->
+  <!-- href="..."  → le nom de ton fichier (ex : cv.html)        -->
+  <!-- l'emoji     → l'icône                                     -->
+  <!-- le texte    → ce qui s'affiche                            -->
+  <nav class="menu" id="menu">
+    <a class="btn" href="Carte.html"><span class="ico">🗺️</span> Jouer</a>
+    <a class="btn" href="Jeux.html"><span class="ico">🎲</span> Dés</a>
+
+  </nav>
+  <!-- ======================================================= -->
+</div>
+
+<div class="aide">
+  <span><b>↑ ↓</b> CHOISIR</span>
+  <span><b>ENTRÉE</b> VALIDER</span>
+  <span><b>SOURIS</b> CLIQUER</span>
+</div>
+
+<script>
+/* ---------- Braises de feu qui montent ---------- */
+const cv = document.getElementById("braises"), ctx = cv.getContext("2d");
+let W, H, braises = [];
+function nouvelle(bas) {
+  return { x: Math.random() * W, y: bas ? H + 10 : Math.random() * H,
+           r: Math.random() * 2.2 + .6, v: Math.random() * .8 + .3,
+           o: Math.random() * Math.PI * 2, a: Math.random() * .6 + .4 };
+}
+function taille() {
+  W = cv.width = innerWidth; H = cv.height = innerHeight;
+  braises = Array.from({ length: 90 }, () => nouvelle(false));
+}
+taille(); addEventListener("resize", taille);
+(function anim() {
+  const g = ctx.createRadialGradient(W / 2, H, 0, W / 2, H, H * 1.1);
+  g.addColorStop(0, "#3a1a08"); g.addColorStop(.5, "#160b05"); g.addColorStop(1, "#0c0806");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < braises.length; i++) {
+    const b = braises[i];
+    b.y -= b.v; b.o += .02; b.x += Math.sin(b.o) * .4;
+    if (b.y < -10) braises[i] = nouvelle(true);
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,${120 + b.r * 40 | 0},40,${b.a * (b.y / H)})`;
+    ctx.shadowColor = "#ff8a20"; ctx.shadowBlur = 10;
+    ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+  requestAnimationFrame(anim);
+})();
+
+/* ---------- Sons (doux, façon harpe) ---------- */
+let sonActif = true, audio;
+function note(freq, duree) {
+  if (!sonActif) return;
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = "triangle"; o.frequency.value = freq;
+    g.gain.setValueAtTime(.12, audio.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, audio.currentTime + duree);
+    o.connect(g); g.connect(audio.destination);
+    o.start(); o.stop(audio.currentTime + duree);
+  } catch (e) {}
+}
+document.getElementById("son").onclick = function () {
+  sonActif = !sonActif; this.textContent = sonActif ? "🔊" : "🔇";
+};
+
+/* ---------- Navigation clavier et souris ---------- */
+const btns = [...document.querySelectorAll(".btn")];
+let sel = 0;
+function choisir(i, sonore = true) {
+  sel = (i + btns.length) % btns.length;
+  btns.forEach((b, j) => b.classList.toggle("actif", j === sel));
+  if (sonore) note(587, .25);
+}
+function valider(lien) {
+  [392, 494, 587, 784].forEach((f, k) => setTimeout(() => note(f, .5), k * 110));
+  document.getElementById("fondu").classList.add("on");
+  setTimeout(() => { location.href = lien.getAttribute("href"); }, 650);
+}
+choisir(0, false);
+
+btns.forEach((b, i) => {
+  b.addEventListener("mouseenter", () => { if (sel !== i) choisir(i); });
+  b.addEventListener("click", e => { e.preventDefault(); choisir(i, false); valider(b); });
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowDown" || e.key === "s") { e.preventDefault(); choisir(sel + 1); }
+  if (e.key === "ArrowUp"   || e.key === "z") { e.preventDefault(); choisir(sel - 1); }
+  if (e.key === "Enter" || e.key === " ")     { e.preventDefault(); valider(btns[sel]); }
+});
+</script>
+
+</body>
+</html>
